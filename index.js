@@ -56,7 +56,7 @@ client.on('interactionCreate', async (interaction) => {
                     }
                 }
 
-                return interaction.reply({
+                if (!isListed) return interaction.reply({
                     content: 'You do not have permission to run this command.\nIf you believe this is a mistake please contact a staff member.',
                     ephemeral: true
                 })
