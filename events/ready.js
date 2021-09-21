@@ -3,6 +3,8 @@ module.exports = {
     once: true,
 
     execute (client) {
-        console.log(`Ready! Logged in as ${client.user.tag}`);
-    },
-};
+        client.user.setStatus('dnd');
+        console.log(`Logged in as ${client.user.tag}!`)
+        require('../deploy').deployAll(client)
+    }
+}
