@@ -23,7 +23,7 @@ module.exports = {
                 name: command.name,
                 description: command.description,
                 options: command.options,
-                defaultPermission: command.permissionForAll || true
+                defaultPermission: command.permissionForAll ?? true
             })
 
             console.log(`Created ${command.name}!`)
@@ -33,11 +33,11 @@ module.exports = {
 
             fullPermissions.push({
                 id: cmd.id,
-                permissions: command.permissions || []
+                permissions: command.permissions ?? []
             })
         }
 
-        await guild?.commands.permissions.set({ fullPermissions })
+        await commands?.permissions.set({ fullPermissions })
         console.log(`Updated all permissions!`)
     }
 }
