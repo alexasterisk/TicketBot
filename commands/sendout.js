@@ -1,4 +1,5 @@
 const { Constants, MessageEmbed, MessageActionRow, MessageButton } = require('discord.js')
+const { creatorId } = require('../config.json')
 const types = Constants.ApplicationCommandOptionTypes
 
 const menus = {
@@ -13,19 +14,19 @@ const menus = {
         rows: [
             new MessageActionRow()
                 .addComponents(new MessageButton()
-                    .setCustomId('support|general_support')
+                    .setCustomId('support|general_support|maximum:3,fullName:General Support')
                     .setLabel('Support')
                     .setStyle('SECONDARY'))
                 .addComponents(new MessageButton()
-                    .setCustomId('support|suggestion')
+                    .setCustomId('support|suggestion|maximum:5,fullName:Suggestion')
                     .setLabel('Suggestion')
                     .setStyle('SECONDARY'))
                 .addComponents(new MessageButton()
-                    .setCustomId('support|user_report')
+                    .setCustomId('support|user_report|maximum:3,fullName:User Report')
                     .setLabel('User Report')
                     .setStyle('SECONDARY'))
                 .addComponents(new MessageButton()
-                    .setCustomId('support|bug_report')
+                    .setCustomId('support|bug_report|maximum:5,fullName:Bug Report')
                     .setLabel('Bug Report')
                     .setStyle('SECONDARY'))
         ]
@@ -38,8 +39,8 @@ module.exports = {
 
     permissionForAll: false,
     permissions: [{
-        id: '889717622051065876',
-        type: 'ROLE',
+        id: creatorId,
+        type: 'USER',
         permission: true
     }],
 
