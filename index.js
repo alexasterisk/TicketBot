@@ -1,18 +1,25 @@
 // requirements
 require('dotenv').config()
 
+const Keyv = require('keyv')
 const { Client, Collection, Intents } = require('discord.js')
 const { readdirSync } = require('fs')
-const { guildId, creatorId } = require('./config.json')
+const { guildId } = require('./config.json')
+
 
 // initialize
+const keyv = new Keyv('sqlite://data.sqlite')
 const client = new Client({
     intents: [
         Intents.FLAGS.GUILDS
     ]
 })
 
+client.database = keyv
+
 // handle all events
+keyv.on('error', err => console.error('Keyv connection error:', error))
+
 const eventFiles = readdirSync('./events').filter(file => file.endsWith('.js'))
 for (const file of eventFiles) {
     const event = require(`./events/${file}`)
@@ -35,7 +42,6 @@ for (const file of commandFiles) {
 
 client.on('interactionCreate', async (interaction) => {
     if (!interaction.inGuild() && interaction.guildId == guildId) return
-    console.log(interaction)
 
     // This is for commands
     if (interaction.isCommand()) {
@@ -70,6 +76,7 @@ client.on('interactionCreate', async (interaction) => {
                 content: 'There was an error while executing this command!',
                 ephemeral: true
             })
+            console.error(error)
         }
 
     // This is for buttons
@@ -79,22 +86,22 @@ client.on('interactionCreate', async (interaction) => {
         // fileName|buttonName|userRunning:userId,name:value ...
         
         const data = interaction.customId.split('|')
-        const fileName = data[1]
+        const fileName = data[0]
 
         const file = client.commands.get(fileName)
         if (!file) return
 
-        const buttonName = data[2]
+        const buttonName = data[1]
         
         // Split the extraData (name:value,name:value) into useable plain JSON table
         // {Name: 'value', name: 'value'}
 
         let dataTable = {}
-        const extraData = data[3].split(',')
+        const extraData = data[2].split(',')
 
         for (const dataPair of extraData) {
             const spl = dataPair.split(':')
-            dataTable[spl[1]] = spl[2]
+            dataTable[spl[0]] = spl[1]
         }
 
         // Attempt running the interaction if the person should be able to run it
