@@ -9,11 +9,7 @@ const { guildId } = require('./config.json')
 
 // initialize
 const keyv = new Keyv('sqlite://data.sqlite')
-const client = new Client({
-    intents: [
-        Intents.FLAGS.GUILDS
-    ]
-})
+const client = new Client({ intents: [ Intents.FLAGS.GUILDS ] })
 
 client.database = keyv
 
