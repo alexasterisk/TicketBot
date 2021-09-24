@@ -49,8 +49,8 @@ module.exports = {
 
                 await new Promise (r => setTimeout(r, 5000))
 
-                await channel.delete().catch(e => {
-                    interaction.reply({
+                await channel?.delete().catch(e => {
+                    interaction.followUp({
                         ephemeral: true,
                         embeds: [new MessageEmbed()
                             .setDescription('Sorry! An error occured while running that interface!\nPlease try again and if the error persists please contact a staff member!')
