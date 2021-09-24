@@ -82,7 +82,7 @@ module.exports = {
                     })
                 }
 
-                if (user.permissionsIn(interaction.channel).has(Permissions.FLAGS.SEND_MESSAGES)) {
+                if (user.permissionsIn(interaction.channel).has(Permissions.FLAGS.VIEW_CHANNEL)) {
                     return interaction.reply({
                         ephemeral: true,
                         embeds: [new MessageEmbed()
