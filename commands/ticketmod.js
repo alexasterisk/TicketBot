@@ -44,7 +44,7 @@ module.exports = {
                     if (user?.permissionsIn(interaction.channel).has(Permissions.FLAGS.VIEW_CHANNEL)) {
 
                         if (user?.roles.cache.has(adminRoleId)) {
-                            return interaction.reply({
+                            return interaction.followUp({
                                 ephemeral: true,
                                 embeds: [new MessageEmbed()
                                     .setDescription('You cannot remove an admin from tickets!')
@@ -58,7 +58,7 @@ module.exports = {
                             SEND_MESSAGES: false
                         }, { type: 1 })
 
-                        interaction.reply({
+                        interaction.followUp({
                             embeds: [new MessageEmbed()
                                 .setDescription(`${interaction.guild.members.cache.get(data.userRemoving)} has been removed from this ticket by ${interaction.user}`)
                                 .setColor('ORANGE')
@@ -67,7 +67,7 @@ module.exports = {
                             ]
                         })
                     } else {
-                        interaction.reply({
+                        interaction.followUp({
                             ephemeral: true,
                             embeds: [new MessageEmbed()
                                 .setDescription('This user is not in this ticket!')
@@ -75,7 +75,7 @@ module.exports = {
                         })
                     }
                 } else {
-                    interaction.reply({
+                    interaction.followUp({
                         ephemeral: true,
                         embeds: [new MessageEmbed()
                             .setDescription('You do not have permission to undo this action.')
