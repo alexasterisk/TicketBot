@@ -116,7 +116,7 @@ module.exports = {
                             ]
                         })
 
-                        const filter = i => i.customId === `ticketmod|undoadd|originalUser:${interaction.user.id},userRemoving:${user.id}` && null // put user locks here
+                        const filter = i => i.customId === `ticketmod|undoadd|originalUser:${interaction.user.id},userRemoving:${user.id}`
                         const collector = interaction.channel.createMessageComponentCollector({ filter, time: 30000 })
 
                         collector.on('collect', async i => {
