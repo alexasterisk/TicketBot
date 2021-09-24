@@ -123,6 +123,7 @@ client.on('interactionCreate', async (interaction) => {
                     .setColor('RED')
                 ]
             })
+            console.error(error)
         }
 
     // This is for Select Menus
