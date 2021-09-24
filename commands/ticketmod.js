@@ -77,7 +77,7 @@ module.exports = {
         unlock: {
             async execute (interaction, data) {
                 if (!interaction.channel.permissionsFor(data.ticketOwner)?.has(Permissions.FLAGS.SEND_MESSAGES)) {
-                    return interaction.reply({
+                    return interaction.followUp({
                         embeds: [new MessageEmbed()
                             .setDescription('This channel is not locked!')
                             .setColor('DARK_RED')
@@ -103,7 +103,7 @@ module.exports = {
                     }]
                 })
                     .then(_ => {
-                        interaction.reply({
+                        interaction.followUp({
                             embeds: [new MessageEmbed()
                                 .setTitle('🔓 Ticket Unlocked')
                                 .setDescription(`${interaction.user} has unlocked this ticket!`)
@@ -113,7 +113,7 @@ module.exports = {
                         })
                     })
                     .catch(error => {
-                        interaction.reply({
+                        interaction.followUp({
                             embeds: [new MessageEmbed()
                                 .setDescription('There was an error unlocking this ticket! Please try again.')
                                 .setColor('RED')
@@ -175,7 +175,7 @@ module.exports = {
             }
         },
 
-        lock: {
+        lock: { // make lock ability appear immediately and disappear immediately
             async execute (interaction) {
                 const isTicket = interaction.channel.name.match(/\d+$/)
                 const reason = interaction.options.getString('reason') ?? 'No reason specified'
@@ -191,15 +191,6 @@ module.exports = {
                             .setTitle('🔒 Ticket Locked')
                             .setTimestamp()
                             .setColor('YELLOW')
-                        ],
-
-                        components: [new MessageActionRow()
-                            .addComponents(new MessageButton()
-                                .setCustomId(`ticketmod|unlock|ticketOwner:${originalTicketCreator},type:${ticketType},lockedBy:${interaction.user.id}`)
-                                .setLabel('Unlock')
-                                .setStyle('SECONDARY')
-                                .setEmoji('🔓')
-                            )
                         ]
                     })
 
@@ -213,6 +204,40 @@ module.exports = {
 
                     const numberOfThreads = await interaction.client.database.get(`opened|${ticketType}|${originalTicketCreator}`) ?? 1
                     interaction.client.database.set(`opened|${ticketType}|${originalTicketCreator}`, (numberOfThreads - 1) ?? 0)
+
+                    await interaction.editReply({
+                        components: [new MessageActionRow()
+                            .addComponents(new MessageButton()
+                                .setCustomId(`ticketmod|unlock|ticketOwner:${originalTicketCreator},type:${ticketType},lockedBy:${interaction.user.id}`)
+                                .setLabel('Unlock')
+                                .setStyle('SECONDARY')
+                                .setEmoji('🔓')
+                            )
+                        ]
+                    })
+
+                    const filter = i => i.customId === `ticketmod|unlock|ticketOwner:${originalTicketCreator},type:${ticketType},lockedBy:${interaction.user.id}`
+                    const collector = interaction.channel.createMessageComponentCollector({
+                        filter,
+                        time: 30000
+                    })
+
+                    collector.on('collect', async i => {
+                        if (i.customId === `ticketmod|unlock|ticketOwner:${originalTicketCreator},type:${ticketType},lockedBy:${interaction.user.id}`) {
+                            await i.update({
+                                components: [new MessageActionRow()
+                                    .addComponents(new MessageButton()
+                                        .setCustomId(`null|null}`)
+                                        .setLabel('Unlock')
+                                        .setStyle('SECONDARY')
+                                        .setEmoji('🔓')
+                                        .setDisabled(true)
+                                    )
+                                ]
+                            })
+                            collector.stop('Received necessary interaction')
+                        }
+                    })
                 } else {
                     interaction.reply({
                         ephemeral: true,

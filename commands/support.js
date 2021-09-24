@@ -93,7 +93,7 @@ module.exports = {
         description: 'What do you need support for?',
         required: true,
         type: types.STRING,
-        choices: [
+        choices: [ // when clicking one of these it should go into a cooldown state, reference ticketmod on updating buttons?
             {name: 'General Support', value: 'general_support'},
             {name: 'Suggestion', value: 'suggestion'},
             {name: 'User Report', value: 'user_report'},
