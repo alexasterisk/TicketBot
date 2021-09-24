@@ -27,7 +27,7 @@ async function createThread (type, interaction, data) {
 
     interaction.guild.channels.create(`${type}-${amountOfThreadsInType}`, {
         type: 'GUILD_TEXT',
-        topic: `Ticket ${amountOfThreadsInType} - ${data.fullName}`,
+        topic: `t:${type};o:${interaction.user.id}`,
         reason: `${interaction.user.tag} opened a ${data.fullName} ticket`,
         parent: supportCategoryId,
         permissionOverwrites: [{

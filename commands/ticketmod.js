@@ -1,5 +1,5 @@
 // refer to support.js
-const { Constants, MessageEmbed, Permissions } = require('discord.js')
+const { Constants, MessageEmbed, Permissions, MessageActionRow, MessageButton } = require('discord.js')
 const { adminRoleId } = require('../config.json')
 const types = Constants.ApplicationCommandOptionTypes
 
@@ -72,11 +72,157 @@ module.exports = {
                     })
                 }
             }
+        },
+
+        unlock: {
+            async execute (interaction, data) {
+                if (!interaction.channel.permissionsFor(data.ticketOwner)?.has(Permissions.FLAGS.SEND_MESSAGES)) {
+                    return interaction.reply({
+                        embeds: [new MessageEmbed()
+                            .setDescription('This channel is not locked!')
+                            .setColor('DARK_RED')
+                        ],
+                        ephemeral: true
+                    })
+                }
+
+                // ticketOwner, type, lockedBy
+                interaction.channel.edit({
+                    permissionOverwrites: [{
+                        id: interaction.guild.roles.everyone,
+                        deny: Permissions.FLAGS.VIEW_CHANNEL
+                    }, {
+                        id: interaction.guild.roles.cache.get(adminRoleId),
+                        allow: [ Permissions.FLAGS.VIEW_CHANNEL, Permissions.FLAGS.SEND_MESSAGES ]
+                    }, {
+                        id: data.ticketOwner,
+                        allow: [ Permissions.FLAGS.VIEW_CHANNEL, Permissions.FLAGS.SEND_MESSAGES ]
+                    }, {
+                        id: interaction.guild.me,
+                        allow: [ Permissions.FLAGS.VIEW_CHANNEL, Permissions.FLAGS.SEND_MESSAGES ]
+                    }]
+                })
+                    .then(_ => {
+                        interaction.reply({
+                            embeds: [new MessageEmbed()
+                                .setTitle('🔓 Ticket Unlocked')
+                                .setDescription(`${interaction.user} has unlocked this ticket!`)
+                                .setTimestamp()
+                                .setColor('DARK_GOLD')
+                            ]
+                        })
+                    })
+                    .catch(error => {
+                        interaction.reply({
+                            embeds: [new MessageEmbed()
+                                .setDescription('There was an error unlocking this ticket! Please try again.')
+                                .setColor('RED')
+                            ]
+                        })
+                        return console.error(error)
+                    })
+            }
         }
     },
 
-    // make ticketmod work lol
-    async execute (interaction) {
-        await interaction.reply('hi')
+
+    // i really doubt that this works
+
+    subs: {
+        close: {
+            async execute (interaction) {
+                const isTicket = interaction.channel.name.match(/\d+$/)
+                const reason = interaction.options.getString('reason') ?? 'No reason specified'
+                const ticketData = interaction.channel.topic?.split(';')
+
+                if (isTicket && ticketData) {
+                    const originalTicketCreator = ticketData[1].split(':')?.[1]
+                    const ticketType = ticketData[0].split(':')?.[1]
+
+                    await interaction.reply({
+                        embeds: [new MessageEmbed()
+                            .setDescription(`${interaction.user} has closed this ticket!\n\n**Reason:** *${reason}*`)
+                            .setTitle('🔒 Ticket Closed')
+                            .setTimestamp()
+                            .setColor('YELLOW')
+                        ]
+                    })
+
+                    await new Promise (r => setTimeout(r, 5000))
+
+                    await interaction.channel.delete(reason).catch(e => {
+                        interaction.reply({
+                            ephemeral: true,
+                            embeds: [new MessageEmbed()
+                                .setDescription('Sorry! An error occured while running that command!\nPlease try again and if the error persists please contact a staff member!')
+                                .setColor('RED')
+                            ]
+                        })
+                        return console.error(e)
+                    })
+
+                    const numberOfThreads = await interaction.client.database.get(`opened|${ticketType}|${originalTicketCreator}`) ?? 1
+                    interaction.client.database.set(`opened|${ticketType}|${originalTicketCreator}`, (numberOfThreads - 1) ?? 0)
+                } else {
+                    interaction.reply({
+                        ephemeral: true,
+                        embeds: [new MessageEmbed()
+                            .setDescription('You do not have permission to delete this ticket!\nThis could be due to that you\'re not in a ticket channel.')
+                            .setColor('DARK_RED')
+                        ]
+                    })
+                }
+            }
+        },
+
+        lock: {
+            async execute (interaction) {
+                const isTicket = interaction.channel.name.match(/\d+$/)
+                const reason = interaction.options.getString('reason') ?? 'No reason specified'
+                const ticketData = interaction.channel.topic?.split(';')
+
+                if (isTicket && ticketData) {
+                    const originalTicketCreator = ticketData[1].split(':')?.[1]
+                    const ticketType = ticketData[0].split(':')?.[1]
+
+                    await interaction.reply({
+                        embeds: [new MessageEmbed()
+                            .setDescription(`${interaction.user} has locked this ticket!`)
+                            .setTitle('🔒 Ticket Locked')
+                            .setTimestamp()
+                            .setColor('YELLOW')
+                        ],
+
+                        components: [new MessageActionRow()
+                            .addComponents(new MessageButton()
+                                .setCustomId(`ticketmod|unlock|ticketOwner:${originalTicketCreator},type:${ticketType},lockedBy:${interaction.user.id}`)
+                                .setLabel('Unlock')
+                                .setStyle('SECONDARY')
+                                .setEmoji('🔓')
+                            )
+                        ]
+                    })
+
+                    await new Promise (r => setTimeout(r, 5000))
+
+                    await interaction.channel.permissionOverwrites.cache.map(async (permission) => {
+                        if (permission.id != adminRoleId && permission.type === 'member' && permission.id != '173174199110729728' && permission.id != '889718572484546590') {
+                            await permission.delete(reason)
+                        }
+                    })
+
+                    const numberOfThreads = await interaction.client.database.get(`opened|${ticketType}|${originalTicketCreator}`) ?? 1
+                    interaction.client.database.set(`opened|${ticketType}|${originalTicketCreator}`, (numberOfThreads - 1) ?? 0)
+                } else {
+                    interaction.reply({
+                        ephemeral: true,
+                        embeds: [new MessageEmbed()
+                            .setDescription('You do not have permission to delete this ticket!\nThis could be due to that you\'re not in a ticket channel.')
+                            .setColor('DARK_RED')
+                        ]
+                    })
+                }
+            }
+        }
     }
 }
