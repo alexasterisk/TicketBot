@@ -1,4 +1,4 @@
-const { Constants, MessageEmbed, MessageActionRow, MessageButton } = require('discord.js')
+const { Constants, MessageEmbed, MessageActionRow, MessageButton, Permissions } = require('discord.js')
 const { adminRoleId } = require('../config.json')
 const types = Constants.ApplicationCommandOptionTypes
 
@@ -67,7 +67,7 @@ module.exports = {
     },
 
     subs: {
-        add: { // TODO: make ticket add not allow adding users who are already on the ticket, dont allow unadding of admins, remove undo button once its been clicked (ref: ticketmod)
+        add: { // TODO: TEST/DONE make ticket add not allow adding users who are already on the ticket, dont allow unadding of admins, remove undo button once its been clicked (ref: ticketmod)
             async execute (interaction) {
                 const user = interaction.options.getMember('user')
                 const reason = interaction.options.getString('reason') ?? 'No reason specified.'
@@ -78,6 +78,16 @@ module.exports = {
                         embeds: [new MessageEmbed()
                             .setDescription('The member you tried adding either does not exist or isn\'t in the server!\nPlease try again.')
                             .setColor('DARK_RED')
+                        ]
+                    })
+                }
+
+                if (user.permissionsIn(interaction.channel).has(Permissions.FLAGS.SEND_MESSAGES)) {
+                    return interaction.reply({
+                        ephemeral: true,
+                        embeds: [new MessageEmbed()
+                            .setDescription(`${user} is already in this ticket!\nIf you meant to add someone else, try again.`)
+                            .setColor('DARK_ORANGE')
                         ]
                     })
                 }
