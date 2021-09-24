@@ -2,7 +2,7 @@
 require('dotenv').config()
 
 const Keyv = require('keyv')
-const { Client, Collection, Intents } = require('discord.js')
+const { Client, Collection, Intents, MessageEmbed } = require('discord.js')
 const { readdirSync } = require('fs')
 const { guildId } = require('./config.json')
 
@@ -63,18 +63,31 @@ client.on('interactionCreate', async (interaction) => {
                 }
 
                 if (!isListed) return interaction.reply({
-                    content: 'You do not have permission to run this command.\nIf you believe this is a mistake please contact a staff member.',
-                    ephemeral: true
+                    ephemeral: true,
+                    embeds: [new MessageEmbed()
+                        .setDescription('You do not have permission to run this command!\nIf you believe this is a mistake please contact a staff member!')
+                        .setColor('DARK_RED')
+                    ]
                 })
             }
         }
 
+        // Now I have to add support for SubCommands..
+        const subcommand = interaction.options.getSubcommand() ?? false
+
         try {
-            await command.execute(interaction)
+            if (subcommand && command.subs?.[subcommand]) {
+                await command.subs[subcommand].execute(interaction)
+            } else {
+                await command.execute(interaction)
+            }
         } catch (error) {
             interaction.reply({
-                content: 'There was an error while executing this command!',
-                ephemeral: true
+                ephemeral: true,
+                embeds: [new MessageEmbed()
+                    .setDescription('There was an error while running your command!')
+                    .setColor('RED')
+                ]
             })
             console.error(error)
         }
@@ -104,20 +117,15 @@ client.on('interactionCreate', async (interaction) => {
             dataTable[spl[0]] = spl[1]
         }
 
-        // Attempt running the interaction if the person should be able to run it
-        if (!dataTable['userRunning'] || (dataTable['userRunning'] === interaction.user.id)) {
-            try {
-                await file.buttons[buttonName]?.execute(interaction, dataTable['userRunning'], dataTable)
-            } catch (error) {
-                interaction.reply({
-                    content: 'There was an error while running this button!',
-                    ephemeral: true
-                })
-            }
-        } else {
+        try {
+            await file.buttons?.[buttonName]?.execute(interaction, dataTable)
+        } catch (error) {
             interaction.reply({
-                content: 'You do not have permission to use this button!',
-                ephemeral: true
+                ephemeral: true,
+                embeds: [new MessageEmbed()
+                    .setDescription('There was an error while running this button!')
+                    .setColor('RED')
+                ]
             })
         }
 
