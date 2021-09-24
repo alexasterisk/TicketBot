@@ -26,7 +26,7 @@ module.exports = {
     buttons: {
         close: {
             async execute (interaction, data) {
-                if ((interaction.user.id !== data.belongsTo) && !interaction.member.roles.cache.get(r => r.name === adminRoleId)) {
+                if ((interaction.user.id !== data.belongsTo) && !interaction.member.roles.cache.get(adminRoleId)) {
                     return interaction.reply({
                         ephemeral: true,
                         embeds: [new MessageEmbed()
