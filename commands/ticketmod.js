@@ -40,9 +40,10 @@ module.exports = {
         undoadd: {
             async execute (interaction, data) {
                 if (interaction.user.id === data.originalUser || interaction.member.roles.cache.get(adminRoleId)) {
-                    if (interaction.channel.permissionsFor(data.userRemoving)?.has(Permissions.FLAGS.VIEW_CHANNEL)) {
+                    const user = await interaction.guild?.members.fetch(data.userRemoving)
+                    if (user?.permissionsIn(interaction.channel).has(Permissions.FLAGS.VIEW_CHANNEL)) {
 
-                        if (interaction.guild.members.fetch(data.userRemoving)?.roles.cache.has(adminRoleId)) {
+                        if (user?.roles.cache.has(adminRoleId)) {
                             return interaction.reply({
                                 ephemeral: true,
                                 embeds: [new MessageEmbed()
@@ -97,7 +98,6 @@ module.exports = {
                     })
                 }
 
-                // ticketOwner, type, lockedBy
                 interaction.channel.edit({
                     permissionOverwrites: [{
                         id: interaction.guild.roles.everyone,
@@ -135,9 +135,6 @@ module.exports = {
             }
         }
     },
-
-
-    // i really doubt that this works
 
     subs: {
         close: {
@@ -186,7 +183,7 @@ module.exports = {
             }
         },
 
-        lock: { // make lock ability appear immediately and disappear immediately
+        lock: {
             async execute (interaction) {
                 const isTicket = interaction.channel.name.match(/\d+$/)
                 const reason = interaction.options.getString('reason') ?? 'No reason specified'
