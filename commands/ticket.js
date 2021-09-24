@@ -100,7 +100,7 @@ module.exports = {
                     type: 1
                 })
                     .then(_ => {
-                        interaction.reply({
+                        await interaction.reply({
                             embeds: [new MessageEmbed()
                                 .setTitle('Member Added to Ticket')
                                 .setDescription(`${interaction.user} has added ${user} to the ticket!\n\n**Reason:** *${reason}*`)
@@ -112,9 +112,36 @@ module.exports = {
                                     .setCustomId(`ticketmod|undoadd|originalUser:${interaction.user.id},userRemoving:${user.id}`)
                                     .setLabel('Undo')
                                     .setStyle('DANGER')
-                                    .setEmoji('✖️')
                                 )
                             ]
+                        })
+
+                        const filter = i => i.customId === `ticketmod|undoadd|originalUser:${interaction.user.id},userRemoving:${user.id}` && null // put user locks here
+                        const collector = interaction.channel.createMessageComponentCollector({ filter, time: 30000 })
+
+                        collector.on('collect', async i => {
+                            if (i.customId === `ticketmod|undoadd|originalUser:${interaction.user.id},userRemoving:${user.id}`) {
+                                if (i.user.id != interaction.user.id || !i.member.roles.cache.get(adminRoleId)) return interaction.followUp({
+                                    ephemeral: true,
+                                    embeds: [new MessageEmbed()
+                                        .setDescription('You do not have permission to undo this interaction!')
+                                        .setColor('DARK_RED')
+                                    ]
+                                })
+
+                                await i.update({
+                                    components: [new MessageActionRow()
+                                        .addComponents(new MessageButton()
+                                            .setCustomId('null|null')
+                                            .setLabel('Undo')
+                                            .setStyle('DANGER')
+                                            .setDisabled(true)
+                                        )
+                                    ]
+                                })
+
+                                collector.stop('Received necessary interaction')
+                            }
                         })
                     })
             }

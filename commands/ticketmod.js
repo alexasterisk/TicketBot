@@ -228,10 +228,7 @@ module.exports = {
                     })
 
                     const filter = i => i.customId === `ticketmod|unlock|ticketOwner:${originalTicketCreator},type:${ticketType},lockedBy:${interaction.user.id}`
-                    const collector = interaction.channel.createMessageComponentCollector({
-                        filter,
-                        time: 30000
-                    })
+                    const collector = interaction.channel.createMessageComponentCollector({ filter, time: 30000 })
 
                     collector.on('collect', async i => {
                         if (i.customId === `ticketmod|unlock|ticketOwner:${originalTicketCreator},type:${ticketType},lockedBy:${interaction.user.id}`) {
