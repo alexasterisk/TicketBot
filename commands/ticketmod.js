@@ -205,8 +205,6 @@ module.exports = {
                         ]
                     })
 
-                    await new Promise (r => setTimeout(r, 5000))
-
                     await interaction.channel.permissionOverwrites.cache.map(async (permission) => {
                         if (permission.id != adminRoleId && permission.type === 'member' && permission.id != '173174199110729728' && permission.id != '889718572484546590') {
                             await permission.delete(reason)
