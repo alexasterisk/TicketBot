@@ -19,22 +19,24 @@ module.exports = {
             // Creating a command
             // This will trigger only if the command specifically says it needs "pushed" AND the command doesn't already exist
 
-            const cmd = await commands?.create({
-                name: command.name,
-                description: command.description,
-                options: command.options,
-                defaultPermission: command.permissionForAll ?? true
-            })
-
-            console.log(`Created ${command.name}!`)
-
-            // Updating all of the permissions for each command
-            // Do not forget defaultPermission when creating/editing a command
-
-            fullPermissions.push({
-                id: cmd.id,
-                permissions: command.permissions ?? []
-            })
+            if (command.isCommand ?? true) {
+                const cmd = await commands?.create({
+                    name: command.name,
+                    description: command.description,
+                    options: command.options ?? [],
+                    defaultPermission: command.permissionForAll ?? true
+                })
+    
+                console.log(`Created ${command.name}!`)
+    
+                // Updating all of the permissions for each command
+                // Do not forget defaultPermission when creating/editing a command
+    
+                fullPermissions.push({
+                    id: cmd.id,
+                    permissions: command.permissions ?? []
+                })
+            }
         }
 
         await commands?.permissions.set({ fullPermissions })
