@@ -26,7 +26,7 @@ async function createThread (type, interaction, data) {
         ]
     })
 
-    if (time - lastTime >= 30000) return interaction.reply({
+    if (time - lastTime <= 30000) return interaction.reply({
         ephemeral: true,
         embeds: [new MessageEmbed()
             .setDescription('Sorry! You\'re currently on cooldown from creating any more tickets of this category.')
