@@ -64,8 +64,11 @@ module.exports = {
         const channel = interaction.options.getChannel('channel')
 
         if (channel.type !== 'GUILD_TEXT') return interaction.reply({
-            contents: 'Please provide a text channel!',
-            ephemeral: true
+            ephemeral: true,
+            embeds: [new MessageEmbed()
+                .setDescription('Please provide a text channel!')
+                .setColor('DARK_RED')
+            ]
         })
 
         await channel.send({
@@ -74,8 +77,11 @@ module.exports = {
         })
 
         interaction.reply({
-            content: `Successfully sent info-box into ${channel}!`,
-            ephemeral: true
+            ephemeral: true,
+            embeds: [new MessageEmbed()
+                .setDescription(`Successfully sent info-box into ${channel}!`)
+                .setColor('GREEN')
+            ]
         })
     }
 }

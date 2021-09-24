@@ -1,5 +1,5 @@
-const { Constants } = require('discord.js')
-const { modRoleId } = require('../config.json')
+const { Constants, MessageEmbed, MessageActionRow, MessageButton } = require('discord.js')
+const { adminRoleId } = require('../config.json')
 const types = Constants.ApplicationCommandOptionTypes
 
 module.exports = {
@@ -21,55 +21,93 @@ module.exports = {
             required: false,
             type: types.STRING
         }]
-    }, {
-        name: 'open',
-        description: 'Creates a new ticket',
-        type: types.SUB_COMMAND,
-        options: [{
-            name: 'type',
-            description: "The type of ticket you'd like to open",
-            required: true,
-            type: types.STRING,
-            choices: [
-                {name: 'General Support', value: 'general_support'},
-                {name: 'Suggestion', value: 'suggestion'},
-                {name: 'User Report', value: 'user_report'},
-                {name: 'Bug Report', value: 'bug_report'}
-            ]
-        }]
     }],
 
     buttons: {
         close: {
-            async execute (interaction, _, data) {
-                if ((interaction.user.id !== data.belongsTo) && !interaction.member.roles.cache.get(r => r.name === modRoleId)) {
+            async execute (interaction, data) {
+                if ((interaction.user.id !== data.belongsTo) && !interaction.member.roles.cache.get(r => r.name === adminRoleId)) {
                     return interaction.reply({
-                        content: 'You do not have permission to close this ticket!',
-                        ephemeral: true
+                        ephemeral: true,
+                        embeds: [new MessageEmbed()
+                            .setDescription('You do not have permission to close this ticket!')
+                            .setColor('DARK_RED')
+                        ]
                     })
                 }
 
-                const numberOfThreads = await interaction.client.database.get(`opened|${data.type}|${data.belongsTo}`) ?? 1
                 const channel = await interaction.guild?.channels.cache.get(data.channelId)
 
-                await interaction.deferReply()
-                await interaction.editReply(`${interaction.user} has closed this ticket.`)
+                await interaction.reply({
+                    embeds: [new MessageEmbed()
+                        .setDescription(`${interaction.user} has closed this ticket!`)
+                        .setTitle('🔒 Ticket Closed')
+                        .setTimestamp()
+                        .setColor('YELLOW')
+                    ]
+                })
+
                 await new Promise (r => setTimeout(r, 5000))
 
                 await channel.delete().catch(e => {
                     interaction.reply({
-                        content: 'An error occured while running that interface, please try again!\nIf this error persists, please contact a staff member.',
-                        ephemeral: true
+                        ephemeral: true,
+                        embeds: [new MessageEmbed()
+                            .setDescription('Sorry! An error occured while running that interface!\nPlease try again and if the error persists please contact a staff member!')
+                            .setColor('RED')
+                        ]
                     })
                     return console.error(e)
                 })
 
+                const numberOfThreads = await interaction.client.database.get(`opened|${data.type}|${data.belongsTo}`) ?? 1
                 interaction.client.database.set(`opened|${data.type}|${data.belongsTo}`, (numberOfThreads - 1) ?? 0)
             }
         }
     },
 
-    async execute (interaction) {
+    subs: {
+        add: {
+            async execute (interaction) {
+                const user = interaction.options.getMember('user')
+                const reason = interaction.options.getString('reason') ?? 'No reason specified.'
 
+                if (!user) {
+                    return interaction.reply({
+                        ephemeral: true,
+                        embeds: [new MessageEmbed()
+                            .setDescription('The member you tried adding either does not exist or isn\'t in the server!\nPlease try again.')
+                            .setColor('DARK_RED')
+                        ]
+                    })
+                }
+
+                interaction.channel.permissionOverwrites.edit(user, {
+                    VIEW_CHANNEL: true,
+                    SEND_MESSAGES: true
+                }, {
+                    reason: reason,
+                    type: 1
+                })
+                    .then(_ => {
+                        interaction.reply({
+                            embeds: [new MessageEmbed()
+                                .setTitle('Member Added to Ticket')
+                                .setDescription(`${interaction.user} has added ${user} to the ticket!\n\n**Reason:** *${reason}*`)
+                                .setColor('GOLD')
+                                .setTimestamp()
+                            ],
+                            components: [new MessageActionRow()
+                                .addComponents(new MessageButton()
+                                    .setCustomId(`ticketmod|undoadd|originalUser:${interaction.user.id},userRemoving:${user.id}`)
+                                    .setLabel('Undo')
+                                    .setStyle('DANGER')
+                                    .setEmoji('✖️')
+                                )
+                            ]
+                        })
+                    })
+            }
+        }
     }
 }
