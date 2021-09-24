@@ -99,39 +99,12 @@ async function createThread (type, interaction, data) {
 
 module.exports = {
     name: 'support',
-    description: 'Create a support ticket to get help from staff members',
-
-    options: [{
-        name: 'for',
-        description: 'What do you need support for?',
-        required: true,
-        type: types.STRING,
-        choices: [ // when clicking one of these it should go into a cooldown state, reference ticketmod on updating buttons?
-            {name: 'General Support', value: 'general_support'},
-            {name: 'Suggestion', value: 'suggestion'},
-            {name: 'User Report', value: 'user_report'},
-            {name: 'Bug Report', value: 'bug_report'}
-        ]
-    }, {
-        name: 'details',
-        description: 'Can you provide any more details?',
-        required: false,
-        type: types.STRING
-    }],
+    isCommand: false,
 
     buttons: {
         general_support: { async execute (interaction, data) { await createThread('general_support', interaction, data) } },
         user_report: { async execute (interaction, data) { await createThread('user_report', interaction, data) } },
         bug_report: { async execute (interaction, data) { await createThread('bug_report', interaction, data) } },
         suggestion: { async execute (interaction, data) { await createThread('suggestion', interaction, data) } },
-    },
-
-    async execute (interaction) {
-        // make slash interactive menu fucking loser
-        // or die
-
-        // wait
-        // this is me
-        // me die
     }
 }
