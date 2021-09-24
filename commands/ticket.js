@@ -121,13 +121,7 @@ module.exports = {
 
                         collector.on('collect', async i => {
                             if (i.customId === `ticketmod|undoadd|originalUser:${interaction.user.id},userRemoving:${user.id}`) {
-                                if (i.user.id != interaction.user.id || !i.member.roles.cache.get(adminRoleId)) return interaction.followUp({
-                                    ephemeral: true,
-                                    embeds: [new MessageEmbed()
-                                        .setDescription('You do not have permission to undo this interaction!')
-                                        .setColor('DARK_RED')
-                                    ]
-                                })
+                                if (i.user.id != interaction.user.id || !i.member.roles.cache.get(adminRoleId)) return
 
                                 await i.update({
                                     components: [new MessageActionRow()
