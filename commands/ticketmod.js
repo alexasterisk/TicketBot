@@ -245,7 +245,7 @@ module.exports = {
                     interaction.reply({
                         ephemeral: true,
                         embeds: [new MessageEmbed()
-                            .setDescription('You do not have permission to delete this ticket!\nThis could be due to that you\'re not in a ticket channel.')
+                            .setDescription('You do not have permission to lock this ticket!\nThis could be due to that you\'re not in a ticket channel.')
                             .setColor('DARK_RED')
                         ]
                     })
