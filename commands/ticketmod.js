@@ -40,7 +40,18 @@ module.exports = {
         undoadd: {
             async execute (interaction, data) {
                 if (interaction.user.id === data.originalUser || interaction.member.roles.cache.get(adminRoleId)) {
-                    if (interaction.channel.permissionsFor(data.userRemoving).has(Permissions.FLAGS.VIEW_CHANNEL)) {
+                    if (interaction.channel.permissionsFor(data.userRemoving)?.has(Permissions.FLAGS.VIEW_CHANNEL)) {
+
+                        if (interaction.guild.members.fetch(data.userRemoving)?.roles.cache.has(adminRoleId)) {
+                            return interaction.reply({
+                                ephemeral: true,
+                                embeds: [new MessageEmbed()
+                                    .setDescription('You cannot remove an admin from tickets!')
+                                    .setColor('DARK_ORANGE')
+                                ]
+                            })
+                        }
+
                         await interaction.channel.permissionOverwrites.edit(data.userRemoving, {
                             VIEW_CHANNEL: false,
                             SEND_MESSAGES: false
