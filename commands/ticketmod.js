@@ -193,6 +193,14 @@ module.exports = {
                     const originalTicketCreator = ticketData[1].split(':')?.[1]
                     const ticketType = ticketData[0].split(':')?.[1]
 
+                    if (!interaction.channel.permissionOverwrites.cache.get(originalTicketCreator)?.allow.has(Permissions.FLAGS.VIEW_CHANNEL)) return interaction.reply({
+                        ephemeral: true,
+                        embeds: [new MessageEmbed()
+                            .setDescription('This channel is already locked!')
+                            .setColor('DARK_RED')
+                        ]
+                    })
+
                     await interaction.reply({
                         embeds: [new MessageEmbed()
                             .setDescription(`${interaction.user} has locked this ticket!`)
