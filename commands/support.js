@@ -12,10 +12,11 @@ const embedInput = {
 }
 
 async function createThread (type, interaction, data) {
+    const time = Date.now()
+
+    const lastTime = await interaction.client.database.get(`timeSince|${type}|${interaction.user.id}`) ?? 0
     const amountOfThreadsInType = await interaction.client.database.get(`opened|${type}|all`) ?? 0
     const amountOfThreads = await interaction.client.database.get(`opened|${type}|${interaction.user.id}`) ?? 0
-    interaction.client.database.set(`opened|${type}|all`, (amountOfThreadsInType + 1) ?? 1)
-    interaction.client.database.set(`opened|${type}|${interaction.user.id}`, (amountOfThreads + 1) ?? 1)
 
     if (amountOfThreads >= data.maximum) return interaction.reply({
         ephemeral: true,
@@ -24,6 +25,18 @@ async function createThread (type, interaction, data) {
             .setColor('DARK_RED')
         ]
     })
+
+    if (time - lastTime >= 30000) return interaction.reply({
+        ephemeral: true,
+        embeds: [new MessageEmbed()
+            .setDescription('Sorry! You\'re currently on cooldown from creating any more tickets of this category.')
+            .setColor('DARK_RED')
+        ]
+    })
+
+    interaction.client.database.set(`timeSince|${type}|${interaction.user.id}`, time)
+    interaction.client.database.set(`opened|${type}|all`, (amountOfThreadsInType + 1) ?? 1)
+    interaction.client.database.set(`opened|${type}|${interaction.user.id}`, (amountOfThreads + 1) ?? 1)
 
     interaction.guild.channels.create(`${type}-${amountOfThreadsInType}`, {
         type: 'GUILD_TEXT',
