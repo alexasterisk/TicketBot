@@ -67,7 +67,7 @@ module.exports = {
     },
 
     subs: {
-        add: { // TODO: TEST/DONE make ticket add not allow adding users who are already on the ticket, dont allow unadding of admins, remove undo button once its been clicked (ref: ticketmod)
+        add: {
             async execute (interaction) {
                 const user = interaction.options.getMember('user')
                 const reason = interaction.options.getString('reason') ?? 'No reason specified.'
@@ -99,7 +99,7 @@ module.exports = {
                     reason: reason,
                     type: 1
                 })
-                    .then(_ => {
+                    .then(async _ => {
                         await interaction.reply({
                             embeds: [new MessageEmbed()
                                 .setTitle('Member Added to Ticket')
