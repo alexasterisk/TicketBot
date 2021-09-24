@@ -58,13 +58,25 @@ client.on('interactionCreate', async (interaction) => {
                     }
                 }
 
-                if (!isListed) return interaction.reply({
-                    ephemeral: true,
-                    embeds: [new MessageEmbed()
-                        .setDescription('You do not have permission to run this command!\nIf you believe this is a mistake please contact a staff member!')
-                        .setColor('DARK_RED')
-                    ]
-                })
+                if (!isListed) {
+                    try {
+                        return interaction.reply({
+                            ephemeral: true,
+                            embeds: [new MessageEmbed()
+                                .setDescription('You do not have permission to run this command!\nIf you believe this is a mistake please contact a staff member!')
+                                .setColor('DARK_RED')
+                            ]
+                        })
+                    } catch {
+                        return interaction.followUp({
+                            ephemeral: true,
+                            embeds: [new MessageEmbed()
+                                .setDescription('You do not have permission to run this command!\nIf you believe this is a mistake please contact a staff member!')
+                                .setColor('DARK_RED')
+                            ]
+                        })
+                    }
+                }
             }
         }
 
@@ -85,6 +97,25 @@ client.on('interactionCreate', async (interaction) => {
                     .setColor('RED')
                 ]
             })
+
+            try {
+                interaction.reply({
+                    ephemeral: true,
+                    embeds: [new MessageEmbed()
+                        .setDescription('There was an error while running your command!')
+                        .setColor('RED')
+                    ]
+                })
+            } catch {
+                interaction.followUp({
+                    ephemeral: true,
+                    embeds: [new MessageEmbed()
+                        .setDescription('There was an error while running your command!')
+                        .setColor('RED')
+                    ]
+                })
+            }
+
             console.error(error)
         }
 
@@ -116,13 +147,24 @@ client.on('interactionCreate', async (interaction) => {
         try {
             await file.buttons?.[buttonName]?.execute(interaction, dataTable)
         } catch (error) {
-            interaction.reply({
-                ephemeral: true,
-                embeds: [new MessageEmbed()
-                    .setDescription('There was an error while running this button!')
-                    .setColor('RED')
-                ]
-            })
+            try {
+                interaction.reply({
+                    ephemeral: true,
+                    embeds: [new MessageEmbed()
+                        .setDescription('There was an error while running this button!')
+                        .setColor('RED')
+                    ]
+                })
+            } catch {
+                interaction.followUp({
+                    ephemeral: true,
+                    embeds: [new MessageEmbed()
+                        .setDescription('There was an error while running this button!')
+                        .setColor('RED')
+                    ]
+                })
+            }
+
             console.error(error)
         }
 
